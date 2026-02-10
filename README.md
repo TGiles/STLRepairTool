@@ -2,6 +2,11 @@
 
 Batch repair non-watertight STL files for 3D printing. This tool recursively finds `.stl` files in the current directory, checks watertightness, backs up originals, and repairs them in-place.
 
+**NOTE:** I used Claude Code for this project.
+I am not a expert Python programmer nor do I know the inner details of `pymeshfix`, `trimesh`, or the Windows `Printing3D.RepairAsync()` API.
+While there are reasonable precautions, such as creating a backup folder before performing any repairs, **you** are responsible for how you use this tool.
+
+I'd recommend checking a known non-manifold STL and then checking the results in your favorite slicer.
 ## How It Works
 
 - Checks each STL for watertightness using `trimesh`
