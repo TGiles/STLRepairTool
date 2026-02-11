@@ -14,11 +14,11 @@
     - windows: Uses Windows Printing3D RepairAsync API (Windows 10+ only).
 
 .PARAMETER CheckWatertight
-    Check if a single file is watertight. Prints True or False and exits.
-    Requires -File parameter.
+    Check if file(s) are watertight. Prints True or False and exits.
+    If -File is provided, checks that file. Otherwise, checks all .stl files in CWD.
 
 .PARAMETER File
-    STL file to check (used with -CheckWatertight).
+    STL file to check (optional, used with -CheckWatertight).
 
 .EXAMPLE
     repair-stl.ps1
@@ -31,6 +31,10 @@
 .EXAMPLE
     repair-stl.ps1 -CheckWatertight -File model.stl
     Check if model.stl is watertight without repairing.
+
+.EXAMPLE
+    repair-stl.ps1 -CheckWatertight
+    Check all .stl files in current directory for watertightness.
 
 .NOTES
     Prerequisites: Python 3, trimesh, numpy
@@ -57,13 +61,13 @@ if ($Help) {
 
 # Handle --check-watertight mode
 if ($CheckWatertight) {
-    if (-not $File) {
-        Write-Error "Error: -CheckWatertight requires -File parameter"
-        exit 1
-    }
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
     $repairScript = Join-Path $scriptDir "repair_stl.py"
-    & python "$repairScript" --check-watertight "$File"
+    if ($File) {
+        & python "$repairScript" --check-watertight "$File"
+    } else {
+        & python "$repairScript" --check-watertight
+    }
     exit $LASTEXITCODE
 }
 

@@ -32,7 +32,18 @@ if "--check-watertight" in args:
     check_only = True
     idx = args.index("--check-watertight")
     args.pop(idx)
-    input_file = args[0]
+    if args:
+        input_file = args[0]
+    else:
+        import glob
+        stl_files = sorted(glob.glob("*.stl"))
+        if not stl_files:
+            print("No .stl files found in the current directory.")
+            sys.exit(1)
+        for stl_file in stl_files:
+            mesh = trimesh.load(stl_file, force="mesh")
+            print(f"{stl_file}: {mesh.is_watertight}")
+        sys.exit(0)
     output_file = None
 elif "--engine" in args:
     idx = args.index("--engine")
@@ -48,7 +59,7 @@ else:
     output_file = args[1] if len(args) > 1 else input_file
 
 if not input_file:
-    print("Usage: repair_stl.py [--engine local|windows] [--check-watertight] input.stl [output.stl]")
+    print("Usage: repair_stl.py [--engine local|windows] [--check-watertight [file.stl]] input.stl [output.stl]")
     sys.exit(1)
 
 # --- Load mesh ---

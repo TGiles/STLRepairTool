@@ -5,7 +5,7 @@
 # Parse optional --help argument
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
   cat <<'EOF'
-Usage: repair-stl.sh [--engine local|windows] [--check-watertight file.stl]
+Usage: repair-stl.sh [--engine local|windows] [--check-watertight [file.stl]]
 
 Batch repair non-watertight STL files for 3D printing.
 
@@ -13,9 +13,10 @@ Recursively finds .stl files in the current directory, checks watertightness,
 backs up originals to stl_backup/, and repairs them in-place.
 
 Options:
-  --engine local|windows       Select repair engine (default: local)
-  --check-watertight file.stl  Check if a single file is watertight (prints True/False)
-  -h, --help                   Show this help message
+  --engine local|windows          Select repair engine (default: local)
+  --check-watertight [file.stl]   Check if file(s) are watertight (prints True/False)
+                                  If no file is specified, checks all .stl files in CWD
+  -h, --help                      Show this help message
 
 Engines:
   local    Uses pymeshfix (if installed) with trimesh fallback. Cross-platform.
@@ -31,13 +32,13 @@ fi
 
 # Parse optional --check-watertight argument
 if [ "$1" = "--check-watertight" ]; then
-  if [ -z "$2" ]; then
-    printf "Error: --check-watertight requires a file path\n" >&2
-    exit 1
-  fi
   SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
   REPAIR_SCRIPT="$SCRIPT_DIR/repair_stl.py"
-  python "$REPAIR_SCRIPT" --check-watertight "$2"
+  if [ -n "$2" ]; then
+    python "$REPAIR_SCRIPT" --check-watertight "$2"
+  else
+    python "$REPAIR_SCRIPT" --check-watertight
+  fi
   exit $?
 fi
 
