@@ -76,8 +76,8 @@ def repair_mesh(mesh):
                 faces = faces.reshape(-1, 4)[:, 1:]
             mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=True)
             pymeshfix_ok = True
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Warning: pymeshfix repair failed: {e}")
 
     if not pymeshfix_ok:
         # Trimesh-only fallback
@@ -87,8 +87,8 @@ def repair_mesh(mesh):
             mesh.remove_duplicate_faces()
             mesh.remove_unreferenced_vertices()
             mesh.fix_normals()
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Warning: trimesh fallback repair failed: {e}")
 
     return mesh
 
@@ -144,8 +144,16 @@ def repair_mesh_windows(mesh, input_file, output_file):
         print("Use --engine local for cross-platform repair.")
         sys.exit(1)
 
-    temp_input_3mf = None
-    temp_output_3mf = None
+    # Check for lxml dependency (required for 3MF export)
+    try:
+        import lxml
+    except ImportError:
+        print("Error: lxml is required for 3MF export but not installed.")
+        print("Install with: pip install lxml")
+        sys.exit(1)
+
+    input_3mf_path = None
+    output_3mf_path = None
 
     try:
         # Create temporary 3MF files
@@ -174,17 +182,26 @@ def repair_mesh_windows(mesh, input_file, output_file):
             return repair_mesh(mesh)
 
         # Load repaired mesh from 3MF
-        repaired_mesh = trimesh.load(output_3mf_path, force="mesh")
+        # process=True is required to merge duplicate vertices from 3MF format
+        # (3MF stores vertices per-triangle; without merging, mesh is "triangle soup" and never watertight)
+        repaired_mesh = trimesh.load(output_3mf_path, force="mesh", process=True)
+
+        # Validate watertight after proper vertex merging
+        if not repaired_mesh.is_watertight:
+            print("Warning: Windows RepairAsync output is not watertight after processing.")
+            print("Falling back to local repair...")
+            return repair_mesh(mesh)
+
         return repaired_mesh
 
     finally:
         # Clean up temp files
-        if temp_input_3mf and os.path.exists(input_3mf_path):
+        if input_3mf_path and os.path.exists(input_3mf_path):
             try:
                 os.unlink(input_3mf_path)
             except Exception:
                 pass
-        if temp_output_3mf and os.path.exists(output_3mf_path):
+        if output_3mf_path and os.path.exists(output_3mf_path):
             try:
                 os.unlink(output_3mf_path)
             except Exception:
