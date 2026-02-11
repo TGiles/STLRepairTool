@@ -3,6 +3,32 @@
 # Source of truth: repair-stl.ps1
 # Update hash: 117e7756-fd53-49e5-b555-dec25e1caa12
 
+# Parse optional --help argument
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    cat <<'EOF'
+Usage: repair-stl.sh [--engine local|windows]
+
+Batch repair non-watertight STL files for 3D printing.
+
+Recursively finds .stl files in the current directory, checks watertightness,
+backs up originals to stl_backup/, and repairs them in-place.
+
+Options:
+  --engine local|windows  Select repair engine (default: local)
+  -h, --help              Show this help message
+
+Engines:
+  local    Uses pymeshfix (if installed) with trimesh fallback. Cross-platform.
+  windows  Uses Windows Printing3D RepairAsync API (Windows 10+ only).
+
+Prerequisites:
+  Python 3, trimesh, numpy
+  Optional: pymeshfix (better local repair quality)
+  Optional: winrt-Windows.Graphics.Printing3D (for Windows engine)
+EOF
+    exit 0
+fi
+
 # Parse optional --engine argument
 ENGINE_ARGS=""
 if [ "$1" = "--engine" ]; then

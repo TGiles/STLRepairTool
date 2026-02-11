@@ -1,10 +1,45 @@
 ﻿# Repair STL batch script
 # Update hash: 117e7756-fd53-49e5-b555-dec25e1caa12
 
+<#
+.SYNOPSIS
+    Batch repair non-watertight STL files for 3D printing.
+
+.DESCRIPTION
+    Recursively finds .stl files in the current directory, checks watertightness,
+    backs up originals to stl_backup/, and repairs them in-place.
+
+.PARAMETER Engine
+    Select repair engine. Valid values: local, windows. Default: local.
+    - local: Uses pymeshfix (if installed) with trimesh fallback. Cross-platform.
+    - windows: Uses Windows Printing3D RepairAsync API (Windows 10+ only).
+
+.EXAMPLE
+    repair-stl.ps1
+    Repair all STL files using the default local engine.
+
+.EXAMPLE
+    repair-stl.ps1 -Engine windows
+    Repair all STL files using the Windows RepairAsync engine.
+
+.NOTES
+    Prerequisites: Python 3, trimesh, numpy
+    Optional: pymeshfix (better local repair quality)
+    Optional: winrt-Windows.Graphics.Printing3D (for Windows engine)
+#>
+
 param(
     [ValidateSet('local', 'windows')]
-    [string]$Engine
+    [string]$Engine,
+
+    [Alias('h')]
+    [switch]$Help
 )
+
+if ($Help) {
+    Get-Help $MyInvocation.MyCommand.Path -Detailed
+    exit
+}
 
 # Directory of this script
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
