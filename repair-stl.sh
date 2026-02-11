@@ -1,11 +1,10 @@
 #!/bin/sh
 # Repair STL batch script (POSIX shell version)
 # Source of truth: repair-stl.ps1
-# Update hash: 117e7756-fd53-49e5-b555-dec25e1caa12
 
 # Parse optional --help argument
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-    cat <<'EOF'
+  cat <<'EOF'
 Usage: repair-stl.sh [--engine local|windows]
 
 Batch repair non-watertight STL files for 3D printing.
@@ -26,22 +25,22 @@ Prerequisites:
   Optional: pymeshfix (better local repair quality)
   Optional: winrt-Windows.Graphics.Printing3D (for Windows engine)
 EOF
-    exit 0
+  exit 0
 fi
 
 # Parse optional --engine argument
 ENGINE_ARGS=""
 if [ "$1" = "--engine" ]; then
-    if [ -z "$2" ]; then
-        printf "Error: --engine requires a value (local or windows)\n" >&2
-        exit 1
-    fi
-    if [ "$2" != "local" ] && [ "$2" != "windows" ]; then
-        printf "Error: --engine must be 'local' or 'windows', got '%s'\n" "$2" >&2
-        exit 1
-    fi
-    ENGINE_ARGS="--engine $2"
-    shift 2
+  if [ -z "$2" ]; then
+    printf "Error: --engine requires a value (local or windows)\n" >&2
+    exit 1
+  fi
+  if [ "$2" != "local" ] && [ "$2" != "windows" ]; then
+    printf "Error: --engine must be 'local' or 'windows', got '%s'\n" "$2" >&2
+    exit 1
+  fi
+  ENGINE_ARGS="--engine $2"
+  shift 2
 fi
 
 # Directory of this script
@@ -56,21 +55,21 @@ mkdir -p "$BACKUP_DIR"
 
 # Recursively process STL files
 find . -path "./stl_backup" -prune -o -name "*.stl" -type f -print | while IFS= read -r stl_file; do
-    printf "Checking file: %s\n" "$stl_file"
+  printf "Checking file: %s\n" "$stl_file"
 
-    # Check if file is watertight
-    result=$(python "$REPAIR_SCRIPT" --check-watertight "$stl_file")
+  # Check if file is watertight
+  result=$(python "$REPAIR_SCRIPT" --check-watertight "$stl_file")
 
-    # Trim whitespace and compare
-    result=$(printf "%s" "$result" | tr -d '[:space:]')
+  # Trim whitespace and compare
+  result=$(printf "%s" "$result" | tr -d '[:space:]')
 
-    if [ "$result" = "True" ]; then
-        printf "  ✓ Already watertight, skipping repair\n"
-    else
-        printf "  Repairing...\n"
-        # Backup original
-        cp "$stl_file" "$BACKUP_DIR/"
-        # Overwrite original with repaired file
-        python "$REPAIR_SCRIPT" $ENGINE_ARGS "$stl_file" "$stl_file"
-    fi
+  if [ "$result" = "True" ]; then
+    printf "  ✓ Already watertight, skipping repair\n"
+  else
+    printf "  Repairing...\n"
+    # Backup original
+    cp "$stl_file" "$BACKUP_DIR/"
+    # Overwrite original with repaired file
+    python "$REPAIR_SCRIPT" $ENGINE_ARGS "$stl_file" "$stl_file"
+  fi
 done

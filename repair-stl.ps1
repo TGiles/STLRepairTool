@@ -1,5 +1,4 @@
 ﻿# Repair STL batch script
-# Update hash: 117e7756-fd53-49e5-b555-dec25e1caa12
 
 <#
 .SYNOPSIS
