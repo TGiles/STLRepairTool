@@ -56,12 +56,26 @@ Run the wrapper script from any directory containing STL files:
 
 **Bash/Git Bash:**
 ```bash
+# Repair all STL files (default local engine)
 repair-stl.sh
+
+# Repair all STL files with Windows engine
+repair-stl.sh --engine windows
+
+# Check if a single file is watertight
+repair-stl.sh --check-watertight model.stl
 ```
 
 **PowerShell:**
 ```powershell
+# Repair all STL files (default local engine)
 repair-stl.ps1
+
+# Repair all STL files with Windows engine
+repair-stl.ps1 -Engine windows
+
+# Check if a single file is watertight
+repair-stl.ps1 -CheckWatertight -File model.stl
 ```
 
 ### Single File via Python Directly

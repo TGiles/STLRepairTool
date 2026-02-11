@@ -13,6 +13,13 @@
     - local: Uses pymeshfix (if installed) with trimesh fallback. Cross-platform.
     - windows: Uses Windows Printing3D RepairAsync API (Windows 10+ only).
 
+.PARAMETER CheckWatertight
+    Check if a single file is watertight. Prints True or False and exits.
+    Requires -File parameter.
+
+.PARAMETER File
+    STL file to check (used with -CheckWatertight).
+
 .EXAMPLE
     repair-stl.ps1
     Repair all STL files using the default local engine.
@@ -20,6 +27,10 @@
 .EXAMPLE
     repair-stl.ps1 -Engine windows
     Repair all STL files using the Windows RepairAsync engine.
+
+.EXAMPLE
+    repair-stl.ps1 -CheckWatertight -File model.stl
+    Check if model.stl is watertight without repairing.
 
 .NOTES
     Prerequisites: Python 3, trimesh, numpy
@@ -31,6 +42,10 @@ param(
     [ValidateSet('local', 'windows')]
     [string]$Engine,
 
+    [switch]$CheckWatertight,
+
+    [string]$File,
+
     [Alias('h')]
     [switch]$Help
 )
@@ -38,6 +53,18 @@ param(
 if ($Help) {
     Get-Help $MyInvocation.MyCommand.Path -Detailed
     exit
+}
+
+# Handle --check-watertight mode
+if ($CheckWatertight) {
+    if (-not $File) {
+        Write-Error "Error: -CheckWatertight requires -File parameter"
+        exit 1
+    }
+    $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+    $repairScript = Join-Path $scriptDir "repair_stl.py"
+    & python "$repairScript" --check-watertight "$File"
+    exit $LASTEXITCODE
 }
 
 # Directory of this script
