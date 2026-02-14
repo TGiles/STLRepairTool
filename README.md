@@ -22,6 +22,18 @@ I'd recommend checking a known non-manifold STL and then checking the results in
   - Fix normals
   - Merge vertices
 
+## Features
+
+- **Parallel Batch Processing**: Repairs multiple files concurrently using process pools for faster throughput
+- **Progress Tracking**: Real-time progress with file-by-file status updates and timing information
+- **Graceful Interruption**: Handles Ctrl+C cleanly with partial summary reporting
+- **Configurable Workers**: Control parallelism with `--workers` flag (defaults to min(cpu_count, 8))
+- **Flexible Watertight Checking**: Check single files or all STLs in a directory for watertightness
+- **Automatic Fallback**: Windows engine automatically falls back to local repair if the API fails or output isn't watertight
+- **Optional Backups**: Skip backup creation in batch mode with `--no-backup` flag
+- **Atomic Writes**: Uses temporary files and atomic replacement to prevent partial/corrupted output
+- **Comprehensive Test Suite**: Full pytest coverage for reliability
+
 ## Prerequisites
 
 ### Core Dependencies (Required)
@@ -64,6 +76,9 @@ repair-stl.sh --engine windows
 
 # Check if a single file is watertight
 repair-stl.sh --check-watertight model.stl
+
+# Check all STL files in current directory for watertightness
+repair-stl.sh --check-watertight
 ```
 
 **PowerShell:**
@@ -76,32 +91,49 @@ repair-stl.ps1 -Engine windows
 
 # Check if a single file is watertight
 repair-stl.ps1 -CheckWatertight -File model.stl
+
+# Check all STL files in current directory for watertightness
+repair-stl.ps1 -CheckWatertight
 ```
 
-### Single File via Python Directly
+### Python Direct Usage
+
+**Batch mode (parallel processing):**
+```bash
+# Repair all .stl files in current directory (parallel)
+python repair_stl.py --batch
+
+# Use specific number of worker processes
+python repair_stl.py --batch --workers 4
+
+# Batch repair with Windows engine
+python repair_stl.py --batch --engine windows
+
+# Skip backup creation
+python repair_stl.py --batch --no-backup
+```
 
 **Check watertightness:**
 ```bash
+# Check a single file
 python repair_stl.py --check-watertight model.stl
+
+# Check all .stl files in current directory
+python repair_stl.py --check-watertight
 ```
 
-**Repair in-place (default local engine):**
+**Single file repair:**
 ```bash
+# Repair in-place (default local engine)
 python repair_stl.py model.stl
-```
 
-**Repair to new file:**
-```bash
+# Repair to new file
 python repair_stl.py input.stl output.stl
-```
 
-**Repair using Windows engine:**
-```bash
+# Repair using Windows engine
 python repair_stl.py --engine windows input.stl output.stl
-```
 
-**Repair using local engine (explicit):**
-```bash
+# Repair using local engine (explicit)
 python repair_stl.py --engine local input.stl output.stl
 ```
 
@@ -131,7 +163,8 @@ The Windows engine uses the `Windows.Graphics.Printing3D.Printing3DModel.RepairA
 **Notes:**
 - The Windows API was previously cloud-based but now runs locally
 - Repair quality and reliability may vary
-- Falls back to local engine if the Windows API fails
+- Automatically validates watertightness after repair and falls back to local engine if output is not watertight
+- Falls back to local engine if the Windows API fails or encounters errors
 - Only available on Windows systems
 
 **When to use:**
@@ -171,3 +204,21 @@ $env:PATH += ";C:\path\to\STLRepairTool"
 - Files with special characters in names are handled safely
 - The script processes subdirectories recursively
 - Original files are preserved in backups before any repairs are attempted
+- Batch mode uses parallel processing by default for faster repairs on multi-core systems
+- Keyboard interrupts (Ctrl+C) are handled gracefully with cleanup and partial summaries
+
+## Testing
+
+The tool includes a comprehensive pytest test suite covering:
+
+- Single file repair operations
+- Batch processing with parallel workers
+- Watertight checking functionality
+- Both local and Windows repair engines
+- Error handling and edge cases
+- Command-line interface and subprocess execution
+
+Run tests with:
+```bash
+pytest test_repair_stl.py -v
+```
