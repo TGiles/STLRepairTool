@@ -12,6 +12,12 @@ __pycache__/
 venv/
 .venv/
 
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
 # Claude Code
 .claude/
 
