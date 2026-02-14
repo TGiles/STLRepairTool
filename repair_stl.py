@@ -12,6 +12,8 @@ from enum import Enum
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
+__version__ = "1.0.0"
+
 # Optional: import pymeshfix if available
 try:
     import pymeshfix

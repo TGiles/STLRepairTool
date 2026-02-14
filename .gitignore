@@ -23,3 +23,9 @@ htmlcov/
 
 # Session files
 SESSION.md
+
+# Packaging
+*.egg-info/
+dist/
+build/
+*.egg

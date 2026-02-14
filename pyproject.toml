@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "repair-stl"
+version = "1.0.0"
+description = "Batch repair non-watertight STL files for 3D printing"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "trimesh",
+    "numpy",
+]
+
+[project.optional-dependencies]
+meshfix = ["pymeshfix"]
+windows = [
+    "lxml",
+    "winrt-Windows.Graphics.Printing3D",
+    "winrt-Windows.Storage",
+    "winrt-Windows.Storage.Streams",
+    "winrt-Windows.Foundation",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+]
+
+[project.scripts]
+repair-stl = "repair_stl:main"
+
+[tool.setuptools]
+py-modules = ["repair_stl"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "windows_only: marks tests that require Windows platform",
+]
