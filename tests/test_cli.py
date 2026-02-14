@@ -20,7 +20,7 @@ def test_cli_check_watertight_with_file(watertight_stl):
         assert "true" in output.getvalue().lower()
 
 
-def test_cli_check_watertight_without_file(stl_directory):
+def test_cli_check_watertight_without_file():
     """--check-watertight (no file) -> scans CWD."""
     with patch.object(sys, 'argv', ['repair_stl.py', '--check-watertight']):
         with patch('repair_stl.discover_stl_files', return_value=['test.stl']):

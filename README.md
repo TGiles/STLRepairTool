@@ -220,5 +220,5 @@ The tool includes a comprehensive pytest test suite covering:
 
 Run tests with:
 ```bash
-pytest test_repair_stl.py -v
+pytest -v
 ```

@@ -497,7 +497,7 @@ Examples:
             result = check_watertight(args.input_file)
             print(result)
         else:
-            stl_files = sorted(glob.glob("*.stl"))
+            stl_files = discover_stl_files(".")
             if not stl_files:
                 print("No .stl files found in the current directory.")
                 sys.exit(1)

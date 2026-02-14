@@ -45,14 +45,15 @@ def test_repair_mesh_windows_asyncio_fails_fallback(non_watertight_mesh):
     """asyncio.run() raises -> falls back to repair_mesh()."""
     with patch.object(repair_stl, 'HAS_WINDOWS_API', True):
         with patch.object(sys, 'platform', 'win32'):
-            with patch('repair_stl.asyncio.run', side_effect=Exception("WinRT error")):
-                with patch('repair_stl.repair_mesh') as mock_repair:
-                    mock_repair.return_value = non_watertight_mesh
-                    result = repair_stl.repair_mesh_windows(
-                        non_watertight_mesh, "/tmp/input.stl", "/tmp/output.stl"
-                    )
-                    # Should fallback to repair_mesh
-                    mock_repair.assert_called_once_with(non_watertight_mesh)
+            with patch('repair_stl.repair_mesh_windows_async', new=MagicMock()):
+                with patch('repair_stl.asyncio.run', side_effect=Exception("WinRT error")):
+                    with patch('repair_stl.repair_mesh') as mock_repair:
+                        mock_repair.return_value = non_watertight_mesh
+                        result = repair_stl.repair_mesh_windows(
+                            non_watertight_mesh, "/tmp/input.stl", "/tmp/output.stl"
+                        )
+                        # Should fallback to repair_mesh
+                        mock_repair.assert_called_once_with(non_watertight_mesh)
 
 
 @pytest.mark.windows_only
@@ -72,10 +73,11 @@ def test_repair_mesh_windows_temp_cleanup(tmp_path, non_watertight_mesh):
 
     with patch.object(repair_stl, 'HAS_WINDOWS_API', True):
         with patch.object(sys, 'platform', 'win32'):
-            with patch('repair_stl.asyncio.run', side_effect=Exception("Cleanup test")):
-                with patch('repair_stl.repair_mesh', return_value=non_watertight_mesh):
-                    # Should not leave temp files
-                    result = repair_stl.repair_mesh_windows(
-                        non_watertight_mesh, str(input_stl), str(output_stl)
-                    )
-                    assert result is not None
+            with patch('repair_stl.repair_mesh_windows_async', new=MagicMock()):
+                with patch('repair_stl.asyncio.run', side_effect=Exception("Cleanup test")):
+                    with patch('repair_stl.repair_mesh', return_value=non_watertight_mesh):
+                        # Should not leave temp files
+                        result = repair_stl.repair_mesh_windows(
+                            non_watertight_mesh, str(input_stl), str(output_stl)
+                        )
+                        assert result is not None
